@@ -19,7 +19,7 @@ var finalStatus = await Api.PollAsync(firstStatus.Uuid);
 
 if (finalStatus.Failed)
 {
-    Console.WriteLine(finalStatus.Failed);
+    Console.WriteLine(finalStatus.ErrorDescription);
 }
 
 var bytes = finalStatus.GetFirstImageBytes();
