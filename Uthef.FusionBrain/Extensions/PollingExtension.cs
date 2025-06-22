@@ -6,7 +6,8 @@ namespace Uthef.FusionBrain.Extensions
     {
         public readonly static TimeSpan DefaultInterval = TimeSpan.FromSeconds(1);
 
-        public static async Task<GenerationStatus> PollAsync(this FusionBrainApi api, Guid uuid, TimeSpan? customInterval = null, Action<GenerationStatus>? callback = null)
+        public static async Task<GenerationStatus> PollAsync(this FusionBrainApi api, Guid uuid, 
+            TimeSpan? customInterval = null, Action<GenerationStatus>? callback = null)
         {
             GenerationStatus status;
             bool inProcess;

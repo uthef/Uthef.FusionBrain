@@ -17,7 +17,7 @@ namespace Uthef.FusionBrain
         {
             Credentials = credentials;
             _httpClient = httpClient ?? new HttpClient();
-            BaseUri = baseUri ?? new("https://api-key.fusionbrain.ai/key/api/v1/");
+            BaseUri = baseUri ?? new("https://api-key.fusionbrain.ai/key/api/v1");
 
             if (httpClient is { })
             {
@@ -31,7 +31,7 @@ namespace Uthef.FusionBrain
 
         public async Task<IEnumerable<Style>> GetStylesAsync(CancellationToken token = default)
         {
-            var uri = new Uri("https://cdn.fusionbrain.ai/static/styles/api");
+            var uri = new Uri("https://cdn.fusionbrain.ai/static/styles/key");
             var response = await _httpClient.GetAsync(uri, token);
 
             response.EnsureSuccessStatusCode();
@@ -40,7 +40,7 @@ namespace Uthef.FusionBrain
 
         public async Task<GenerationStatus> GenerateAsync(Prompt prompt, CancellationToken token = default)
         {
-            var uri = GetFullUri("text2image/run");
+            var uri = GetFullUri("pipeline/run");
 
             var request = new HttpRequestMessage(HttpMethod.Post, uri);
 
@@ -48,7 +48,7 @@ namespace Uthef.FusionBrain
 
             var multipartData = new MultipartFormDataContent
             {
-                { new StringContent(prompt.Model.Id.ToString()), "model_id" },
+                { new StringContent(prompt.Model.Id.ToString()), "pipeline_id" },
                 { @params, "params" }
             };
 
@@ -63,23 +63,36 @@ namespace Uthef.FusionBrain
 
         public async Task<IEnumerable<Model>> GetModelsAsync(CancellationToken token = default)
         {
-            var uri = GetFullUri("models");
+            var uri = GetFullUri("pipelines");
 
             var response = await _httpClient.GetAsync(uri, token);
             response.EnsureSuccessStatusCode();
-
+            
             var models = await response.Content.ReadFromJsonAsync<IEnumerable<Model>>(cancellationToken: token);
             return models ?? throw new UnexpectedResponseException();
         }
 
         public async Task<GenerationStatus> CheckStatusAsync(Guid uuid, CancellationToken token = default)
         {
-            var uri = GetFullUri($"text2image/status/{uuid}");
+            var uri = GetFullUri($"pipeline/status/{uuid}");
 
             var response = await _httpClient.GetAsync(uri, token);
             response.EnsureSuccessStatusCode();
-
+            
             var status = await response.Content.ReadFromJsonAsync<GenerationStatus>(cancellationToken: token);
+            return status ?? throw new UnexpectedResponseException();
+        }
+
+        public async Task<ServiceAvailability> CheckServiceAvailability(Model model, CancellationToken token = default)
+        {
+            var uri = GetFullUri($"pipeline/{model.Id}/availability");
+
+            var response = await _httpClient.GetAsync(uri, token);
+            response.EnsureSuccessStatusCode();
+            
+            Console.WriteLine(await response.Content.ReadAsStringAsync());
+            
+            var status = await response.Content.ReadFromJsonAsync<ServiceAvailability>(cancellationToken: token);
             return status ?? throw new UnexpectedResponseException();
         }
 

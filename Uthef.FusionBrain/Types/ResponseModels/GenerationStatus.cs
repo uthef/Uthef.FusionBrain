@@ -7,36 +7,26 @@ namespace Uthef.FusionBrain.Types.ResponseModels
     {
         public Status Status { get; }
         public Guid Uuid { get; }
+        
+        public GenerationResult? Result { get; } 
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public IEnumerable<string>? Images { get; }
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        public bool Censored { get; }
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public string? ErrorDescription { get; }
-
-        [JsonIgnore]
-        public bool Completed => Status == Status.Done && Images is { };
+        [JsonIgnore] public bool Completed => Status == Status.Done && Result is { };
 
         [JsonIgnore]
         public bool Failed => Status == Status.Fail;
 
-        public GenerationStatus(Status status, Guid uuid, IEnumerable<string>? images, bool censored, string? errorDescription)
+        public GenerationStatus(Status status, Guid uuid, GenerationResult? result)
         {
             Status = status;
             Uuid = uuid;
-            Images = images;
-            Censored = censored;
-            ErrorDescription = errorDescription;
+            Result = result;
         }
 
         public byte[]? GetFirstImageBytes()
         {
-            if (!Completed || !Images!.Any()) return null;
+            if (!Completed || Result?.Files is null || !Result.Files.Any()) return null;
 
-            return Convert.FromBase64String(Images!.First());
+            return Convert.FromBase64String(Result.Files.First());
         }
 
     }

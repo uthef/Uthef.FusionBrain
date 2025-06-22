@@ -26,11 +26,22 @@ namespace Uthef.FusionBrain.Test
         [SetUp]
         public void Setup() { }
 
+
+        [Test]
+        public async Task CheckAvailability()
+        {
+            var models = await Api.GetModelsAsync();
+            Assert.That(models.Any(), Is.True);
+            var availability = await Api.CheckServiceAvailability(models.First());
+            
+            Assert.That(availability.Status.Length > 0);
+        }
+        
         [Test]
         public async Task GetStyles()
         {
             var styles = await Api.GetStylesAsync();
-            Assert.That(styles, Is.Not.Empty);
+            Assert.That(styles.Any(), Is.True);
 
             foreach (var style in styles)
             {
@@ -55,11 +66,19 @@ namespace Uthef.FusionBrain.Test
 
             if (finalStatus.Failed)
             {
-                Console.WriteLine(finalStatus.ErrorDescription);
+                Console.WriteLine(finalStatus.Result?.ErrorDescription);
             }
 
             var bytes = finalStatus.GetFirstImageBytes();
+            Assert.That(finalStatus.Result, Is.Not.Null);
             Assert.That(bytes, Is.Not.Null);
+
+            int counter = 0;    
+            
+            foreach (var base64Image in finalStatus.Result!.Files!)
+            {
+                await File.WriteAllBytesAsync($"{finalStatus.Uuid}-{counter++}.jpg", Convert.FromBase64String(base64Image));
+            }
         }
     }
 }
