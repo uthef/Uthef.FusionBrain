@@ -1,4 +1,5 @@
 ﻿# Fusion Brain API
+Fusion Brain is a free AI image generation service.
 Official documentation: https://fusionbrain.ai/docs/en/doc/api-dokumentaciya/
 
 ## Usage example
